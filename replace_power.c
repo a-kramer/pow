@@ -3,7 +3,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#define WORD(c) ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= '0' && (c) <= '9') || ((c) == '_')
+#define WORD(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= '0' && (c) <= '9') || ((c) == '_'))
+
+#ifndef _GNU_SOURCE
+void *mempcpy(void *dest, const void *src, size_t len){
+  return memcpy (dest, src, len) + len;
+}
+#endif
 
 int word(char c){
 	if (c >= 'a' && c <= 'z') return 1;
