@@ -11,6 +11,9 @@ void *mempcpy(void *dest, const void *src, size_t len){
 }
 #endif
 
+const char *pow_str[]={"gsl_pow_","gsl_pow_int","pow",NULL};
+enum pow_type {small_integer_power, integer_power, double_power};
+
 int word(char c){
 	if (c >= 'a' && c <= 'z') return 1;
 	if (c >= 'A' && c <= 'Z') return 1;
@@ -27,20 +30,19 @@ int find(const char *s, char c){
 	return i;
 }
 
-/* append, but remove whitespace and
-	 one layer of parenthese*/
-char *append(char *buffer, char *left, char *right){
-	while (*left==' ') left++;
-	while (*right==' ') right--;
-	if (*left=='(' && *right==')'){
-		left++;
-		right--;
+/* remove whitespace and one layer of parenthese*/
+void tighten(char **left, char **right){
+	while (**left==' ') (*left)++;
+	while (**right==' ') (*right)--;
+	if (**left=='(' && **right==')'){
+		(*left)++;
+		(*right)--;
 	}
-	char *out;
-	*(out = (char*) mempcpy(buffer,left,1+(right-left)))='\0';
-	return out;
 }
 
+/* does this: (var1 + (var2 / var3))         */
+/*            ^boundary            ^start    */
+/* either in forward or backward direction   */
 char* find_boundary(const char* src, char *start, int direction){
 	char *ptr=start;
 	if (direction==0) return ptr;
@@ -65,7 +67,7 @@ int count(const char *s, char c){
 	return z;
 }
 
-/* check that all n string elements are numerical digits */
+/* check that all n characters are numerical digits [0-9] */
 int digit(const char *str, size_t n){
 	int i;
 	for (i=0;i<n;i++){
@@ -74,13 +76,12 @@ int digit(const char *str, size_t n){
 	return 1;
 }
 
-// replaces a^b with pow(a,b)
+/* replaces a^b with pow(a,b) */
 void replace(char *buffer, const char *src){
 	char *ptr;
 	char *out;
 	char *b_open, *b_close, *e_open, *e_close;
 	/* b - base; e - exponent; */
-
 	char *hat=strchr(src,'^');
 	if (hat){
 		ptr = hat-1;
@@ -88,6 +89,7 @@ void replace(char *buffer, const char *src){
 		/* find base: */
 		b_close= ptr;
 		b_open = find_boundary(src,ptr,-1);
+		tighten(&b_open,&b_close);
 		/* copy initial part, if any, to output buffer */
 		*(out=(char*) mempcpy(buffer,src,b_open-src))='\0';
 		/* find the exponent */
@@ -95,24 +97,25 @@ void replace(char *buffer, const char *src){
 		while (*ptr==' ') ptr++;
 		e_open = ptr;
 		e_close= find_boundary(src,ptr,+1);
+		tighten(&e_open,&e_close);
 		/* add power functin to buffer: */
 		if (e_open==e_close && digit(e_open,1)){
-			*(out=(char*) mempcpy(out,"gsl_pow_",8))='\0';
-			out=append(out,e_open,e_close);
+			*(out=(char*) mempcpy(out,pow_str[small_integer_power],strlen(pow_str[small_integer_power])))='\0';
+			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,"(",1))='\0';
-			out=append(out,b_open,b_close);
+			*(out=(char*) mempcpy(out,b_open,1+(b_open-b_close)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		} else if (digit(e_open,1+(e_close-e_open))){
-			*(out=(char*) mempcpy(out,"gsl_pow_int(",12))='\0';
-			out=append(out,b_open,b_close);
+			*(out=(char*) mempcpy(out,pow_str[integer_power],strlen(pow_str[integer_power])))='\0';
+			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,", ",2))='\0';
-			out=append(out,e_open,e_close);
+			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		} else {
-			*(out=(char*) mempcpy(out,"pow(",4))='\0';
-			out=append(out,b_open,b_close);
+			*(out=(char*) mempcpy(out,pow_str[double_power],strlen(pow_str[double_power])))='\0';
+			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,", ",2))='\0';
-			out=append(out,e_open,e_close);
+			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		}
 		*(out=(char*) mempcpy(out,e_close+1,strlen(e_close)))='\0';
@@ -125,7 +128,7 @@ int main(int argc, char *argv[]){
 		printf("Usage: %s 'math expression'\n",argv[0]);
 		abort();
 	}
-	const char max_pow_str[]="gsl_pow_int";
+	const char max_pow_str[]="gsl_pow_int(,)"; /* maximum possible extra content per ^ */
 	size_t max_l=strlen(max_pow_str);
 	const char *str = argv[1];
 	int i,n=count(str,'^');
