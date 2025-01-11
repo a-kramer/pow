@@ -89,7 +89,6 @@ void replace(char *buffer, const char *src){
 		/* find base: */
 		b_close= ptr;
 		b_open = find_boundary(src,ptr,-1);
-		tighten(&b_open,&b_close);
 		/* copy initial part, if any, to output buffer */
 		*(out=(char*) mempcpy(buffer,src,b_open-src))='\0';
 		/* find the exponent */
@@ -97,22 +96,25 @@ void replace(char *buffer, const char *src){
 		while (*ptr==' ') ptr++;
 		e_open = ptr;
 		e_close= find_boundary(src,ptr,+1);
+		tighten(&b_open,&b_close);
 		tighten(&e_open,&e_close);
 		/* add power functin to buffer: */
 		if (e_open==e_close && digit(e_open,1)){
 			*(out=(char*) mempcpy(out,pow_str[small_integer_power],strlen(pow_str[small_integer_power])))='\0';
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,"(",1))='\0';
-			*(out=(char*) mempcpy(out,b_open,1+(b_open-b_close)))='\0';
+			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		} else if (digit(e_open,1+(e_close-e_open))){
 			*(out=(char*) mempcpy(out,pow_str[integer_power],strlen(pow_str[integer_power])))='\0';
 			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
+			*(out=(char*) mempcpy(out,"(",1))='\0';
 			*(out=(char*) mempcpy(out,", ",2))='\0';
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		} else {
 			*(out=(char*) mempcpy(out,pow_str[double_power],strlen(pow_str[double_power])))='\0';
+			*(out=(char*) mempcpy(out,"(",1))='\0';
 			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,", ",2))='\0';
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
