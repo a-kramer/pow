@@ -134,7 +134,7 @@ int main(int argc, char *argv[]){
 		printf("Usage: %s 'math expression'\n",argv[0]);
 		abort();
 	}
-	const char max_pow_str[]="gsl_pow_int(,)"; /* maximum possible extra content per ^ */
+	const char max_pow_str[]="gsl_pow_int(,)"; /* maximum possible extra content per caret (^) in input */
 	size_t max_l=strlen(max_pow_str);
 	const char *str = argv[1];
 	int i,n=count(str,'^');
