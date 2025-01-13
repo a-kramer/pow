@@ -82,6 +82,9 @@ void replace(char *buffer, const char *src){
 	char *out;
 	char *b_open, *b_close, *e_open, *e_close;
 	/* b - base; e - exponent; */
+	const char *ps;
+	size_t n;
+	enum pow_type t=double_power;
 	char *hat=strchr(src,'^');
 	if (hat){
 		ptr = hat-1;
@@ -100,27 +103,28 @@ void replace(char *buffer, const char *src){
 		tighten(&e_open,&e_close);
 		/* add power functin to buffer: */
 		if (e_open==e_close && digit(e_open,1)){
-			*(out=(char*) mempcpy(out,pow_str[small_integer_power],strlen(pow_str[small_integer_power])))='\0';
+			t=small_integer_power;
+		} else if (digit(e_open,1+(e_close-e_open))) {
+			t=integer_power;
+		}
+		ps=pow_str[t];
+		n=strlen(ps);
+		switch (t){
+		case small_integer_power:
+			*(out=(char*) mempcpy(out,ps,n))='\0';
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,"(",1))='\0';
 			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
-		} else if (digit(e_open,1+(e_close-e_open))){
-			*(out=(char*) mempcpy(out,pow_str[integer_power],strlen(pow_str[integer_power])))='\0';
-			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
-			*(out=(char*) mempcpy(out,"(",1))='\0';
-			*(out=(char*) mempcpy(out,", ",2))='\0';
-			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
-			*(out=(char*) mempcpy(out,")",1))='\0';
-		} else {
-			*(out=(char*) mempcpy(out,pow_str[double_power],strlen(pow_str[double_power])))='\0';
+			break;
+		default:
+			*(out=(char*) mempcpy(out,ps,n))='\0';
 			*(out=(char*) mempcpy(out,"(",1))='\0';
 			*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
 			*(out=(char*) mempcpy(out,", ",2))='\0';
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		}
-		*(out=(char*) mempcpy(out,e_close+1,strlen(e_close)))='\0';
 	}
 }
 
