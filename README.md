@@ -25,13 +25,13 @@ a)^b
 
 These all match despite having unmatched parnetheses. There is no regex for _please only consider matched parentheses_. And the capture groups also need to catch operators, of course: `(1+a)^(1/3)`.
 
-The only workaround is to use multiple, correctly ordered expressions, with mandatory matched parentheses, or no parentheses:
+The only workaround is to use multiple, correctly ordered expressions, with mandatory matched parentheses, or no parentheses, similar to this (but more of these):
 
 ```sed
-s/([[:alnum:]]+)^([[:alnum:]]+)//g
-s/\(([^()]+)\)^/([[:alnum:]]+)/g
-s/\(([^()]+)\)^/\(([^()]+)\)/g
-s/([[:alnum:]])^/\(([^()]+)\)/g
+s/([[:alnum:]]+)^([[:alnum:]]+)/pow(\1,\2)/g
+s/\(([^()]+)\)^([[:alnum:]]+)/pow(\1,\2)/g
+s/\(([^()]+)\)^\(([^()]+)\)/pow(\1,\2)/g
+s/([[:alnum:]])^\(([^()]+)\)/pow(\1,\2)/g
 ```
 And this only covers one set of parentheses, no nesting.
 Maybe there are tricks to avoid repeating very similar patterns, but I don't know them.
