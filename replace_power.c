@@ -18,7 +18,7 @@ int word(char c){
 	if (c >= 'a' && c <= 'z') return 1;
 	if (c >= 'A' && c <= 'Z') return 1;
 	if (c >= '0' && c <= '9') return 1;
-	if (c=='_') return 1;
+	if (c=='_' || c=='.') return 1;
 	return 0;
 }
 
@@ -99,6 +99,7 @@ void replace(char *buffer, const char *src){
 		while (*ptr==' ') ptr++;
 		e_open = ptr;
 		e_close= find_boundary(src,ptr,+1);
+		ptr=e_close+1;
 		tighten(&b_open,&b_close);
 		tighten(&e_open,&e_close);
 		/* add power functin to buffer: */
@@ -125,6 +126,7 @@ void replace(char *buffer, const char *src){
 			*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
 			*(out=(char*) mempcpy(out,")",1))='\0';
 		}
+		*(out=(char*) mempcpy(out,ptr,strlen(ptr)))='\0';
 	}
 }
 
@@ -138,9 +140,18 @@ int main(int argc, char *argv[]){
 	size_t max_l=strlen(max_pow_str);
 	const char *str = argv[1];
 	int i,n=count(str,'^');
-	char *buffer=malloc(strlen(str)+max_l*n);
-	char *src=malloc(strlen(str)+max_l*n);
+	char *buffer=malloc(1+strlen(str)+max_l*n);
+	char *src=malloc(1+strlen(str)+max_l*n);
+	if (!buffer) {
+		perror("failed to allolcate output buffer.");
+		abort();
+	}
+	if (!src) {
+		perror("failed to allolcate input (copy) buffer.");
+		abort();
+	}
 	strcpy(src,str);
+	strcpy(buffer,str);
 	for (i=0;i<n;i++){
 		replace(buffer,src);
 		strcpy(src,buffer);

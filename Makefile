@@ -1,7 +1,7 @@
-CC=cc
+CC=gcc
 CFLAGS=-O2 -march=native -Wall
 
-.PHONY: all
+.PHONY: all test
 
 
 all: rp
@@ -9,3 +9,6 @@ all: rp
 
 rp: replace_power.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+test: rp
+	tests/test.sh
