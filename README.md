@@ -81,6 +81,8 @@ Some languages lack a fundamental power operation entirely (GNU Guile, Lisp):
 ;7.999999999999998
 ```
 
+Substituting `^` for `**` is trivial. Same goes for the `exp` and `log` functions, they look the same in almost any programming language. In some, they are capitalized, or use the ln spelling for natual logarithms: `Exp()`, `Ln()` in yacas. These substitutions are also trivial.
+
 ## C
 
 In C, powers are written either as `pow(a, b)`, or  with more specific integer power functions from the GNU Scientific Library:
