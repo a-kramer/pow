@@ -1,20 +1,21 @@
 This program substitutes `a^b` to `pow(a,b)`.
 
-With `pow`
+With `pow`:
+
+```sh
+$ ./rp a^b
+pow(a,b)
+$ ./rp '(1+(1+(1+a)))^(b/c)'
+pow(1+(1+(1+a)), b/c)
+```
+
+And alternatively with `exp` and `log`:
 
 ```sh
 $ ./rp -e a^b
 exp(b*log(a))
 $ ./rp -e 'a^(b+c)'
 exp((b+c)*log(a))
-```
-
-And alternatively with `exp` and `log`:
-```sh
-$ ./rp a^b
-pow(a,b)
-$ ./rp '(1+(1+(1+a)))^(b/c)'
-pow(1+(1+(1+a)), b/c)
 ```
 
 # Powers and Hats
