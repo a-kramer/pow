@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define WORD(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= '0' && (c) <= '9') || ((c) == '_'))
 
@@ -102,7 +103,7 @@ void replace(char *buffer, const char *src){
 		ptr=e_close+1;
 		tighten(&b_open,&b_close);
 		tighten(&e_open,&e_close);
-		/* add power functin to buffer: */
+		/* add power function to buffer: */
 		if (e_open==e_close && digit(e_open,1)){
 			t=small_integer_power;
 		} else if (digit(e_open,1+(e_close-e_open))) {
@@ -130,30 +131,76 @@ void replace(char *buffer, const char *src){
 	}
 }
 
+/* replaces a^b with exp(b*log(a)) */
+void replaceExpLog(char *buffer, const char *src){
+	char *ptr;
+	char *out;
+	char *b_open, *b_close, *e_open, *e_close;
+	/* b - base; e - exponent; */
+	char *hat=strchr(src,'^');
+	if (hat){
+		ptr = hat-1;
+		while (*ptr==' ') ptr--;
+		/* find base: */
+		b_close= ptr;
+		b_open = find_boundary(src,ptr,-1);
+		/* copy initial part, if any, to output buffer */
+		*(out=(char*) mempcpy(buffer,src,b_open-src))='\0';
+		/* find the exponent */
+		ptr  = hat+1;
+		while (*ptr==' ') ptr++;
+		e_open = ptr;
+		e_close= find_boundary(src,ptr,+1);
+		ptr=e_close+1;
+		tighten(&b_open,&b_close);
+		/* add power function to buffer: */
+		*(out=(char*) mempcpy(out,"exp",3))='\0';
+		*(out=(char*) mempcpy(out,"(",1))='\0';
+		*(out=(char*) mempcpy(out,e_open,1+(e_close-e_open)))='\0';
+		*(out=(char*) mempcpy(out,"*log(",5))='\0';
+		*(out=(char*) mempcpy(out,b_open,1+(b_close-b_open)))='\0';
+		*(out=(char*) mempcpy(out,"))",2))='\0';
+		*(out=(char*) mempcpy(out,ptr,strlen(ptr)))='\0';
+	}
+}
+
 int main(int argc, char *argv[]){
 	if (argc<2) {
 		printf("%s replaces powers in $1,\nwritten as a^b (infix operator),\nwith a function pow(a,b).\n\n",argv[0]);
 		printf("Usage: %s 'math expression'\n",argv[0]);
 		abort();
 	}
+	/*                       "exp(·*log(·))" is smaller than gsl_pow_int(·,·)*/
 	const char max_pow_str[]="gsl_pow_int(,)"; /* maximum possible extra content per caret (^) in input */
 	size_t max_l=strlen(max_pow_str);
-	const char *str = argv[1];
+	const char *str;
+	int j;
+	enum fmt {POW,EXP};
+	enum fmt f=POW;
+	for (j=1;j<argc;j++){
+		if (strcmp(argv[j],"-e")==0) f=EXP;
+		else if (strcmp(argv[j],"-p")==0) f=POW;
+		else str=argv[j];
+	}
+	assert(str);
 	int i,n=count(str,'^');
 	char *buffer=malloc(1+strlen(str)+max_l*n);
 	char *src=malloc(1+strlen(str)+max_l*n);
 	if (!buffer) {
-		perror("failed to allolcate output buffer.");
+		perror("failed to allocate output buffer.");
 		abort();
 	}
 	if (!src) {
-		perror("failed to allolcate input (copy) buffer.");
+		perror("failed to allocate input (copy) buffer.");
 		abort();
 	}
 	strcpy(src,str);
 	strcpy(buffer,str);
 	for (i=0;i<n;i++){
-		replace(buffer,src);
+		switch(f){
+		case EXP: replaceExpLog(buffer,src); break;
+		case POW: replace(buffer,src); break;
+		}
 		strcpy(src,buffer);
 	}
 	printf("%s\n",buffer);

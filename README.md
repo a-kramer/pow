@@ -1,18 +1,42 @@
-# Powers and Hats
-
 This program substitutes `a^b` to `pow(a,b)`.
+
+With `pow`
+
+```sh
+$ ./rp -e a^b
+exp(b*log(a))
+$ ./rp -e 'a^(b+c)'
+exp((b+c)*log(a))
+```
+
+And alternatively with `exp` and `log`:
+```sh
+$ ./rp a^b
+pow(a,b)
+$ ./rp '(1+(1+(1+a)))^(b/c)'
+pow(1+(1+(1+a)), b/c)
+```
+
+# Powers and Hats
 
 There is an unofficial (almost-) consensus of human-plain-text-math.
 Most humans would write `2^3` in emails and other text documents
 (without proof), using the caret (`U+005E`) operator (or _hat_):
 `a^b`.
 
-But, there are other conventions and sometimes it is necessary to
-parse powers and convert them to functions.
+The `a**b` is probably even a little better in some sense. On one hand
+it is a two letter operator, thus breaking the pattern of one letter
+opertors `+` `-` `*` `/` and then `**`. On the other hand, integer
+powers are repeated multiplications: `a*a*a == a**2`, so it looks self
+explanatory. And of course `^` can mean xor as well, which is never
+the case for `**`.
 
-This is difficult to do with regular expressions, e.g.:
-`\(?([[:alnum:]]+)\)?\^\(?([[:alnum:]]+)\)?`, to capture base and
-exponent.
+But, there are other conventions as well and sometimes it is necessary
+to parse powers and convert them to functions.
+
+Matching powers is difficult to do with regular expressions, e.g.:
+`\(?([[:alnum:]]+)\)?\^\(?([[:alnum:]]+)\)?`, with capture groups for _base_ and
+_exponent_.
 
 The above expression will match these (some of which erroneosly):
 
@@ -23,9 +47,13 @@ a)^b
 (a)^b)
 ```
 
-These all match despite having unmatched parnetheses. There is no regex for _please only consider matched parentheses_. And the capture groups also need to catch operators, of course: `(1+a)^(1/3)`.
+These all match regardless of unmatched parnetheses. There is no
+regex for _please only consider matched parentheses_. And the capture
+groups also need to catch operators, of course: `(1+a)^(1/3)`.
 
-The only workaround is to use multiple, correctly ordered expressions, with mandatory matched parentheses, or no parentheses, similar to this (but more of these):
+The only workaround I can think of is to use multiple, correctly
+ordered expressions, with mandatory matched parentheses, or no
+parentheses, similar to (but more than that):
 
 ```sed
 s/([[:alnum:]]+)^([[:alnum:]]+)/pow(\1,\2)/g
@@ -115,3 +143,4 @@ A Makefile is included:
 ```sh
 make && make test
 ```
+
