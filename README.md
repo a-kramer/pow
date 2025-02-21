@@ -23,12 +23,14 @@ exp((b+c)*log(a))
 There is an unofficial (almost-) consensus of human-plain-text-math.
 Most humans would write `2^3` in emails and other text documents
 (without proof), using the caret (`U+005E`) operator (or _hat_):
-`a^b`.
+`a^b`. LaTeX uses `^`, so it can't be wrong. In some cases known
+integer powers can be written as `a²`, but this is not usually done in
+plain text.
 
 The `a**b` is probably even a little better in some sense. On one hand
 it is a two letter operator, thus breaking the pattern of one letter
 opertors `+` `-` `*` `/` and then `**`. On the other hand, integer
-powers are repeated multiplications: `a*a*a == a**2`, so it looks self
+powers are repeated multiplications: `a*a*a == a**3`, so it looks self
 explanatory. And of course `^` can mean xor as well, which is never
 the case for `**`.
 
