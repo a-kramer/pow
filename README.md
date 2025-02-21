@@ -77,7 +77,7 @@ Maybe there are tricks to avoid repeating very similar patterns, but I don't kno
 
 Nested expressions make this task especially difficult:
 
-$$ \left(1+\left(1+(1+a)\right)\right)^3\,, $$
+$$ \left(1+\left(1+(1+a)\right)\right)^3,$$
 
 where a regex would struggle to find the correct parenthesis to capture the base sub-group. As text, this is:
 
@@ -173,7 +173,7 @@ pow(-a, b) ; a-gsl_pow_3(b) ; gsl_pow_4(-1.0) ; pow(a, -1)
 
 ## Corollary
 
-The `dc` program has no precedence to its operators at all, and _still_ unary minuses are a problem:
+The `dc` program has no precedence to its operators at all, and _still_ has problems with unary minuses:
 
 ```sh
 $ echo '1 -2 + p' | dc
@@ -188,10 +188,10 @@ $ echo '1 _2 + p' | dc
 -1
 ```
 
-... but only in the inut, with hilarious consequences. Say
-$$f(a,b) = (a+b) - 1*(a+b < 0),$$
-and we want to call `dc` twice, to cover the
-inequality cases (otherwise we could do the entire function in one dc call of course).
+... but only in the input, with hilarious consequences. Say
+$$f(a,b) = (a+b) - 1 \times (a+b < 0),$$ (inequalities evaluate to 1 or 0).
+Here we _want_ to call `dc` twice, to cover the inequality cases
+(otherwise we could do the entire function in one dc call, of course).
 
 ```sh
 $ f () {
