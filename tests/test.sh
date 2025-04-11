@@ -7,9 +7,9 @@ FMT="%25s "
 # 1: math expression
 # 2: expected result
 Compare () {
-	ORIGINAL="$1"
-	EXPECTED="$2"
-	OUT=`$RP "$ORIGINAL"`
+	ORIGINAL=`echo "$1" | tr -d ' '`
+	EXPECTED=`echo "$2" | tr -d ' '`
+	OUT=`$RP "$ORIGINAL" | tr -d ' '`
 	printf "$FMT" "$ORIGINAL"
 	printf "$FMT" "$EXPECTED"
 	printf "$FMT" "$OUT"
@@ -27,3 +27,4 @@ Compare "a+(b+(c)^g)" "a+(b+pow(c, g))"
 Compare "a+var^20" "a+gsl_pow_int(var, 20)"
 Compare "a+b^(1+c)+d" "a+pow(b, 1+c)+d"
 Compare "a^1.3e5" "pow(a, 1.3e5)"
+Compare "(a^1.3e-5)" "(pow(a, 1.3e-5))"
